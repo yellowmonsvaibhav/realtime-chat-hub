@@ -7,12 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Hash, Loader2 } from 'lucide-react';
+import { lovable } from '@/integrations/lovable/index';
 
 export function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -95,6 +97,33 @@ export function AuthPage() {
               {isLogin ? 'Sign In' : 'Create Account'}
             </Button>
           </form>
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            disabled={googleLoading}
+            onClick={async () => {
+              setGoogleLoading(true);
+              const { error } = await lovable.auth.signInWithOAuth("google", {
+                redirect_uri: window.location.origin,
+              });
+              if (error) {
+                toast({ title: 'Error', description: error.message, variant: 'destructive' });
+              }
+              setGoogleLoading(false);
+            }}
+          >
+            {googleLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Sign in with Google
+          </Button>
           <div className="mt-4 text-center text-sm text-muted-foreground">
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
             <button
